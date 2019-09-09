@@ -2,6 +2,7 @@
 library(shiny)
 library(DT)
 library(ggplot2)
+library(dplyr)
 
 
 parking <- read.csv("WPRDCparkingDATA.csv")
@@ -42,6 +43,7 @@ ui <- fluidPage(
         )
     )
 )
+filter
 
 # Define Server logic for barplot
 
@@ -51,11 +53,11 @@ server <- function(input, output) {
         validate(
             need(input$lottype, 'Check at least one type of parking!')
         )
-        parkpay <- filter(parking, rate <= input$maxpay)
+        parkpay <- filter(parking, parking$rate <= input$maxpay)
         parknona <- na.omit(parkpay, cols=c(input$Yaxis, "rate"))
         parkomit <- parking[!(parkpay[,1] %in% parknona[,1]),]
         if(length(input$lottype) == 2){
-            parklot = parknona
+            parklot <- parknona
         } else if(length(input$lottype) == 1) {
             parklot <- filter(parknona, type == input$lottype)
         } else {
@@ -98,7 +100,7 @@ server <- function(input, output) {
     
     observeEvent(input$omits, {
         #optional table of omitted results
-        output$table <- renderDataTable(parkomit,
+        output$table <- renderDataTable(output$parkomit,
                                         options = list(
                                             pageLength = 5 ))
     })
